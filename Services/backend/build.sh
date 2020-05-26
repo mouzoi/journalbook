@@ -3,28 +3,27 @@
 SCRIPT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 MAJOR=1
-MINOR=1
+MINOR=0
 REVISION=${MAJOR}.${MINOR}.`git rev-list --count HEAD`
 if [ -f version ]; then
     VERSION=`cat version`
     REVISION=$(echo $VERSION|tr -d '\n')
 fi
 
-gcp-setup() {
-    PROJECT_ID=XXXX
-    SECRETS_PATH=secrets/
+PROJECT_ID=xxx
+SECRETS_PATH=secrets/
 
-    [ -z  ${PROJECT_ID} ] && echo "Please set PROJECT_ID" && echo "exiting..." && exit -1
+[ -z  ${PROJECT_ID} ] && echo "Please set PROJECT_ID" && echo "exiting..." && exit -1
 
-    if [ ! -z $(command -v gcloud) ]; then
-        gcloud config set project ${PROJECT_ID}
-        gcloud auth activate-service-account --key-file=${SECRETS_PATH}credentials.json --project ${PROJECT_ID}
-        gcloud container clusters get-credentials dev-rapidfort-us-central1 --zone us-central1-a --project ${PROJECT_ID}
-    fi
+# if [ ! -z $(command -v gcloud) ]; then
+#     gcloud config set project ${PROJECT_ID}
+#     gcloud auth activate-service-account --key-file=${SECRETS_PATH}credentials.json --project ${PROJECT_ID}
+#     gcloud container clusters get-credentials dev-rapidfort-us-central1 --zone us-central1-a --project ${PROJECT_ID}
+# fi
 
-    export DOCKER_IMAGE_NAME=gcr.io/${PROJECT_ID}/backend
-    gcloud auth configure-docker
-}
+export DOCKER_IMAGE_NAME=gcr.io/${PROJECT_ID}/backend
+#gcloud auth configure-docker
+
 
 stop() {
     DOCKER_IMAGE_ID=`docker images -a | grep ${DOCKER_IMAGE_NAME} | awk '{print $3}'`
@@ -81,7 +80,9 @@ shell() {
 
 run() {
     pushd app
-        docker run --rm -d -p 6379:6379 --name redis-rejson redislabs/rejson:latest
+        redis_running=$(docker ps -a | grep redis |  awk '{print $2}')
+        # start redis if not running
+        [ -z "${redis_running}" ] && docker run --rm -d -p 6379:6379 --name redis-rejson redislabs/rejson:latest
         REDIS_HOST=localhost python3 main.py
     popd
 }

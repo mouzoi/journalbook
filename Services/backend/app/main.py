@@ -8,7 +8,7 @@ import sys
 import json
 import logging
 
-import HTTPStatus
+from http import HTTPStatus
 import asyncio
 import tornado.ioloop
 import tornado.web
@@ -36,7 +36,7 @@ def _init():
     try:
         r=redis.StrictRedis(host=redis_host, port=redis_port,charset="utf-8", decode_responses=True)
         if r.ping():
-            LOG.info("PONG")
+            LOG.info("redis connected")
     except Exception as e:
         LOG.error(f"{e}")
         sys.exit()
@@ -58,6 +58,7 @@ def _main():
     _init()
     try:
         app = _make_app()
+        LOG.info(f"backend listening on {app_port}")
         app.listen(app_port)
         tornado.ioloop.IOLoop.current().start()
     except Exception as e:          # pylint: disable=broad-except

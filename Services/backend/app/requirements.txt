@@ -1,8 +1,2 @@
 tornado==6.0.4
-docker==4.1.0
-pytz==2019.3
-pathspec==0.7.0
-boto3==1.11.9
-pyjwt[crypto]==1.7.1
-mysqlclient==1.4.6
-tornado-sqlalchemy==0.7.0
+redis==3.0.1
