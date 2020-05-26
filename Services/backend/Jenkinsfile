@@ -1,0 +1,39 @@
+pipeline {
+
+    environment {
+        BRANCH          = "${params.BRANCH}"
+        ORGANIZATION    = "${params.ORGANIZATION}"
+        PROJECT         = "${params.PROJECT}"
+        APPLICATION     = "${params.APPLICATION}"
+    }
+
+    agent any
+
+    parameters {
+        choice(name: 'BRANCH',       choices: ['master','dev','stage','prod'], description: 'Build configurations')
+        string(name: 'ORGANIZATION', defaultValue: 'ARS', description: 'Organization')
+        string(name: 'PROJECT',      defaultValue: 'ARS-Core', description: 'Project')
+        string(name: 'APPLICATION',  defaultValue: 'backend', description: 'Application')
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {
+                sh "./build.sh build"
+            }
+        }
+
+        stage('Push') {
+            steps {
+                sh "./build.sh push"
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                 sh "./build.sh deploy"
+            }
+        }
+    }
+}
